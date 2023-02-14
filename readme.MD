@@ -7,6 +7,8 @@ Technologies used:
 * `Javascript`
 * `HTML and CSS`
 
+### Port No: (localhost)/8000
+
 ## Important links
 To clone project 
 ```
