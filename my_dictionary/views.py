@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import requests
 from retrying import retry
+from decouple import config
 
 
 def home(request):
@@ -10,8 +11,8 @@ def home(request):
 @retry(wait_fixed=5000, stop_max_attempt_number=3)
 def search(request):
     word = request.GET['word']
-    app_id = '5c856024'
-    app_key = '1f2d433e10f3b7cb46816e854f939e79'
+    app_id = config("API_ID")
+    app_key = config("API_KEY")
     language_code = 'en'
 
     url = f'https://od-api.oxforddictionaries.com:443/api/v2/entries/{language_code}/{word.lower()}'
