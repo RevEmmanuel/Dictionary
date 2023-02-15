@@ -24,16 +24,32 @@ def search(request):
         senses = data['results'][0]['lexicalEntries'][0]['entries'][0]['senses']
         definitions = [sense['definitions'][0] for sense in senses if 'definitions' in sense]
         synonyms = [synonym['text'] for sense in senses for synonym in sense.get('synonyms', [])]
-        # antonyms = [antonym['text'] for sense in senses for antonym in sense.get('antonyms', [])]
     else:
         definitions = []
         synonyms = []
-        # antonyms = []
 
     results = {
         'word': word,
         'meaning': '\n\n'.join(str(x) for x in definitions),
     }
 
-    # return render(request, 'search.html', {'se': synonyms, 'ae': antonyms, 'results': results})
-    return render(request, 'search.html', {'se': synonyms, 'results': results})
+    # get antonyms using Merriam-Webster Dictionary
+    url = "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/"
+    api_key = config("MWEBAPI_KEY")
+
+    response = requests.get(url + word, params={"key": api_key})
+    if response.status_code == 200:
+        data = response.json()
+        # get the first definition object
+        definition = data[0]
+        # get the antonyms for the first definition
+        antonyms = definition.get("meta", {}).get("ants")
+        new_antonyms_list = [item for sublist in antonyms for item in sublist]
+    else:
+        new_antonyms_list = []
+
+    # return syntax to return definition, synonyms and antonyms
+    return render(request, 'search.html', {'se': synonyms, 'ae': new_antonyms_list, 'results': results})
+
+    # return syntax for returning only definition and synonyms
+    # return render(request, 'search.html', {'se': synonyms, 'results': results})
